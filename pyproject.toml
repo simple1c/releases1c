@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "releases1c"
+version = "0.1.0"
+description = "Package manager for releases.1c.ru"
+authors = ["Serg Repin"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+bumpver = "^2023.1127"
+click = "^8.1.7"
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.2"
+html5lib = "^1.1"
+args = "^0.1.0"
+clint = "^0.5.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
