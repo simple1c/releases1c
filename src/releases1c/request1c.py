@@ -54,7 +54,13 @@ class Request1C:
             print('>> UNSUPPORTED >>',url_path,url_query_params)
         
         return {'parse_op':parse_op,'can_be_file':can_be_file}
-
+    
+    def get_head(self, url):
+        resph = self.session.head(url,allow_redirects=True)
+        return resph
+    
+    def get_stream(self, url):
+        return self.session.get(url, stream=True)
 
     def get(self, url:str):
         config_url = self.get_url_params(url)
@@ -83,8 +89,8 @@ class Request1C:
     def get_local_filename(self,url,path):
         if self.is_dirname(path):
             resph = self.session.head(url,allow_redirects=True)
-            print('resph.url',resph.url)
-            print('resph.headers',resph.headers)
+            #print('resph.url',resph.url)
+            #print('resph.headers',resph.headers)
 
             if (resph.headers.get('content-disposition')):
                 filename = [x[1].replace('"','') for x in [k.strip().split('=') for k in resph.headers.get('content-disposition').split(';')] if x[0] == 'filename'][0]

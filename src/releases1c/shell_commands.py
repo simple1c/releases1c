@@ -1,6 +1,8 @@
 import click
+from releases1c import __version__
 from releases1c.request1c import Request1C
 from releases1c.secrets import credentials
+from releases1c.downloader import get_download_url_by_filetype, WrongFiletype, download
 from releases1c import parsing
 import os
 
@@ -54,12 +56,15 @@ def prepare_executors(parameters,flush_cookie):
         url = f"{releasesURL}/version_files?nick={parameters[0]}&ver={parameters[1]}"
         display = lambda f: print('-',f['filetype'],'-',f['file'],'-',f['name'])
     elif lpr == 3:
-        __file_list = [x for x in get_data(releasesURL+f"/version_files?nick={parameters[0]}&ver={parameters[1]}",flush_cookie) if x.get('filetype')==parameters[2]]
-        if len(__file_list) == 0:
+        try:
+            url = get_download_url_by_filetype(**dict(zip(['product','version','filetype'],parameters)))
+        except WrongFiletype as err:
             print("Wrong filetype:",parameters[2])
             return prepare_executors(parameters[:2],flush_cookie)
         else:
-            url = f"{releasesURL}{__file_list[0].get('url')}"
+
+            #print('url',url)
+            #url = f"{releasesURL}{__file_list[0].get('url')}"
             display = lambda f: print('-',f)
             is_file_list = True
     else:
@@ -71,26 +76,22 @@ def get_data(url,flush_cookie):
     r1c = Request1C(**credentials,flush_cookie=flush_cookie)
     return r1c.get(url)
 
-@cli.command()
-#@click.option('paths', '--path', envvar='PATHS', type=click.File())
-#@click.argument('project')
-#@click.argument('version')
-#@click.argument('filetype')
+@cli.command(name='download')
 @click.argument('parameters',nargs=3,metavar='PROJECT VERSION FILETYPE')
 @click.argument('filepath',type=click.Path(exists=False,writable=True))
-def download(parameters,filepath):
+@click.pass_context
+def download_cmd(ctx,parameters,filepath):
     '''Download file for project and version'''
     #print('filepath',filepath,os.path.isfile(filepath),os.path.isdir(filepath))
-    settings = prepare_executors(parameters, False)
-    if settings['is_file_list']:
-        file_list = get_data(settings['url'], False)
-        
-        print('File list:', file_list)
+    try:
+        download(**credentials,**dict(zip(['product','version','filetype'],parameters)),dest=filepath)
+    except WrongFiletype as err:
+        print("Wrong filetype:",parameters[2])
+        ctx.invoke(info(parameters[:2]))
 
-        r1c = Request1C(**credentials,flush_cookie=False)
-        return r1c.download(file_list[0],dest=filepath)
-    else:
-        print_info('ERROR >>>',settings, False)
+@cli.command()
+def version():
+    print('Version:',__version__)
 
 if __name__ == "__main__":
     cli(auto_envvar_prefix='RELEASES1C')
