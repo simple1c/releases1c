@@ -81,44 +81,6 @@ class Request1C:
 
         return config_url['parse_op'](resp.content.decode())
     
-    def is_dirname(self,path):
-        if (path == '.' or path == '..' or os.path.isdir(path)):
-            path = os.path.join(path,'')
-        return path[-1] == os.sep
-
-    def get_local_filename(self,url,path):
-        if self.is_dirname(path):
-            resph = self.session.head(url,allow_redirects=True)
-            #print('resph.url',resph.url)
-            #print('resph.headers',resph.headers)
-
-            if (resph.headers.get('content-disposition')):
-                filename = [x[1].replace('"','') for x in [k.strip().split('=') for k in resph.headers.get('content-disposition').split(';')] if x[0] == 'filename'][0]
-            else:
-                filename = resph.url.split('/')[-1]
-            return os.path.join(path,filename)
-        else:
-            return path
-    
-    def download(self, url:str, dest:str):
-        file_name = self.get_local_filename(url,dest)
-        print('Downloading to:', file_name)
-        r = self.session.get(url, stream=True)
-        with open(file_name, "wb") as f:
-            total_length = r.headers.get('content-length')
-            if total_length is None: # no content length header
-                f.write(r.content)
-                print('Complete!')
-            else:
-                dl = 0
-                total_length = int(total_length)
-                for chunk in r.iter_content(chunk_size=int(total_length/5000)):
-                    if chunk:
-                        f.write(chunk)
-                        f.flush()
-                    dl += len(chunk)
-                    printProgressBar(dl, total_length, prefix = 'Progress:', suffix = f'Complete ({int(total_length/1024/1024)} Mb)', length = 50)
-
     def authenticate(self, url, only_headers=False):
 
         # obtain token
