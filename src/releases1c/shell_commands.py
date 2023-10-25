@@ -1,10 +1,8 @@
 import click
-from releases1c import __version__
-from releases1c.request1c import Request1C
+from releases1c.request1c import Request1C, AuthenticationErrpr
 from releases1c.secrets import credentials
 from releases1c.downloader import get_download_url_by_filetype, WrongFiletype, download
-from releases1c import parsing
-import os
+from releases1c import manuals, error_codes, __version__
 
 releasesURL = "https://releases.1c.ru"
 
@@ -13,23 +11,6 @@ def safe_list_get (l, idx, default):
         return l[idx]
     except IndexError:
         return default
-
-@click.group()
-def cli():
-    pass
-
-@cli.command(short_help='Get information about projects, versions and files')
-@click.option('-f','--flush-cookie',type=bool,is_flag=True,default=False, show_default=True,help="Flush the cookie")
-@click.argument('parameters',nargs=-1,metavar='[PROJECT] | [PROJECT VERSION] | [PROJECT VERSION FILETYPE]')
-def info(parameters,flush_cookie) -> None:
-    '''Get information for project and verison and filetype'''
-
-    settings = prepare_executors(parameters,flush_cookie)
-
-    #print('>> DEBUG >>',settings['url'](parameters))
-
-    print_info(settings, flush_cookie)
-
 
 def print_info(settings, flush_cookie):
     
@@ -41,7 +22,7 @@ def print_info(settings, flush_cookie):
     for row in data:
         settings['display'](row)
 
-def prepare_executors(parameters,flush_cookie):
+def prepare_executors(parameters,flush_cookie,error_code=0):
 
     lpr = len(parameters)
     is_file_list = False
@@ -59,38 +40,61 @@ def prepare_executors(parameters,flush_cookie):
         try:
             url = get_download_url_by_filetype(**dict(zip(['product','version','filetype'],parameters)))
         except WrongFiletype as err:
-            print("Wrong filetype:",parameters[2])
-            return prepare_executors(parameters[:2],flush_cookie)
+            print("Wrong filetype1:",parameters[2])
+            return prepare_executors(parameters[:2],flush_cookie,error_codes.wrong_filetype)
         else:
-
-            #print('url',url)
-            #url = f"{releasesURL}{__file_list[0].get('url')}"
             display = lambda f: print('-',f)
             is_file_list = True
     else:
         print("Unsupported parameters:", parameters[2:])
     
-    return {'url':url, 'display':display, 'is_file_list':is_file_list}
+    return {'url':url, 'display':display, 'is_file_list':is_file_list,'error_code':error_code}
 
 def get_data(url,flush_cookie):
     r1c = Request1C(**credentials,flush_cookie=flush_cookie)
     return r1c.get(url)
 
+@click.group()
+def cli():
+    pass
+
+@cli.command(short_help='Get information about projects, versions and files')
+@click.option('-f','--flush-cookie',type=bool,is_flag=True,default=False, show_default=True,help="Flush the cookie")
+@click.option('-e','--error-code',type=int,hidden=True)
+@click.argument('parameters',nargs=-1,metavar='[PROJECT] | [PROJECT VERSION] | [PROJECT VERSION FILETYPE]')
+def info(parameters,flush_cookie,error_code) -> None:
+    '''Get information for project and verison and filetype'''
+    try:
+        settings = prepare_executors(parameters,flush_cookie,error_code)
+        print_info(settings, flush_cookie)
+        quit(settings.get('error_code'))
+    except AuthenticationErrpr as err:
+        print("Error:",err.message)
+        manuals.howto_authentication()
+
 @cli.command(name='download')
+@click.option('-f','--flush-cookie',type=bool,is_flag=True,default=False, show_default=True,help="Flush the cookie")
 @click.argument('parameters',nargs=3,metavar='PROJECT VERSION FILETYPE')
 @click.argument('filepath',type=click.Path(exists=False,writable=True))
 @click.pass_context
-def download_cmd(ctx,parameters,filepath):
+def download_cmd(ctx,parameters,filepath,flush_cookie):
     '''Download file for project and version'''
     #print('filepath',filepath,os.path.isfile(filepath),os.path.isdir(filepath))
     try:
-        download(**credentials,**dict(zip(['product','version','filetype'],parameters)),dest=filepath)
+        download(**credentials,**dict(zip(['product','version','filetype'],parameters)),dest=filepath,flush_cookie=flush_cookie)
+
     except WrongFiletype as err:
         print("Wrong filetype:",parameters[2])
-        ctx.invoke(info(parameters[:2]))
+        ctx.invoke(info,parameters=parameters[:2],flush_cookie=flush_cookie,error_code=error_codes.wrong_filetype)
+
+    except AuthenticationErrpr as err:
+        print("Error:",err.message)
+        manuals.howto_authentication()
+        quit(error_codes.authentication_error)
 
 @cli.command()
 def version():
+    '''Show current version'''
     print('Version:',__version__)
 
 if __name__ == "__main__":

@@ -11,6 +11,22 @@ pip install --upgrade agent1c_metrics
 
 # Usage
 
+## Set authentication environment
+
+Windows:
+
+```
+set RELEASES1C_USERNAME=<username>
+set RELEASES1C_PASSWORD=<password>
+```
+
+Linux, Mac:
+
+```
+export RELEASES1C_USERNAME=<username>
+export RELEASES1C_PASSWORD=<password>
+```
+
 ## Get info
 
 ### Get list of available packages 

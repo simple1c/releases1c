@@ -9,6 +9,14 @@ from clint.textui import progress
 import time
 from releases1c.progress import printProgressBar
 
+class AuthenticationErrpr(Exception):
+
+    message = ""
+
+    def __init__(cls,message):
+        super()
+        cls.message = message
+
 class Request1C:
     
     session = None
@@ -88,8 +96,8 @@ class Request1C:
         payload = json.dumps(auth_data)
         resp = self.session.post(f"{self.loginURL}/rest/public/ticket/get",data=payload, headers={'Content-Type':'application/json'})
         if resp.status_code != 200:
-            print(resp.status_code,resp.headers,resp.url, resp.json())
-            return resp
+            err_data = resp.json()
+            raise AuthenticationErrpr(err_data['message'])
 
         # login
         if (only_headers):
