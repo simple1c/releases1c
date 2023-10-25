@@ -31,7 +31,7 @@ tag_message = "{new_version}"
 tag_scope = "default"
 pre_commit_hook = ""
 post_commit_hook = ""
-commit = false
+commit = true
 tag = false
 push = false
 
