@@ -63,19 +63,19 @@ python -m releases1c info Platform83 8.3.23.1912 setuptc.rar .
 
 # Contribution
 
-## Install package in editable mode
+Install package in editable mode
 
 ```
 pip install -e .
 ```
 
-## Change version (major/minor/patch)
+Change version (major/minor/patch)
 
 ```
 bumpver update --patch
 ```
 
-## Build and publish the package
+Build and publish the package
 
 ```
 poetry publish --build
