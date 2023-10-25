@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "releases1c"
-version = "1.0.1"
+version = "1.0.2"
 description = "Package manager for releases.1c.ru"
 authors = ["Serg Repin"]
 license = "GPLv3"
@@ -24,7 +24,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.bumpver]
-current_version = "1.0.1"
+current_version = "1.0.2"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
