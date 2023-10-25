@@ -1,5 +1,5 @@
 # releases1c
-Package manager for release.1c.ru, ver: 1.0.2
+Package manager for release.1c.ru, ver: 1.0.3
 
 # Installation
 
