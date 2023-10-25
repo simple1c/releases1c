@@ -80,3 +80,7 @@ Build and publish the package
 ```
 poetry publish --build
 ```
+
+# Idea come from
+
+[OneGet|https://github.com/v8platform/oneget],[Downloader1C|https://github.com/nmnike/Downloader1C]
