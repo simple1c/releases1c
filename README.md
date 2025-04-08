@@ -58,7 +58,38 @@ python -m releases1c info Platform83 8.3.23.1912 setuptc.rar
 Download file by its filetype into corrent folder
 
 ```
-python -m releases1c info Platform83 8.3.23.1912 setuptc.rar .
+python -m releases1c download Platform83 8.3.23.1912 setuptc.rar .
+```
+
+# Docker
+
+## Environment
+
+.env:
+```
+RELEASES1C_USERNAME=9999999
+RELEASES1C_PASSWORD=9999999
+```
+
+## Run
+
+For info:
+
+```
+docker run -it --rm  --env-file .env simple1c/releases1c python -m releases1c info Platform83 8.3.24.1819 client.deb64.zip
+```
+
+For many commands:
+
+```
+docker run -it --rm  --env-file .env -v distr1c:/opt/distr1c  simple1c/releases1c bash
+```
+
+## Download
+
+```
+python -m releases1c download Platform83 8.3.24.1819 client.deb64.zip /opt/distr1c/.
+python -m releases1c download Platform83 8.3.24.1819 deb64.zip /opt/distr1c/.
 ```
 
 # Contribution
