@@ -92,6 +92,12 @@ python -m releases1c download Platform83 8.3.24.1819 client.deb64.zip /opt/distr
 python -m releases1c download Platform83 8.3.24.1819 deb64.zip /opt/distr1c/.
 ```
 
+# Build Docker-image
+
+```
+docker build --build-arg USERNAME=username --build-arg PASSWORD="password" --build-arg PLATFORM1C_VERSION=8.3.24.1667 --rm -t myfirm/myimage:8.3.24.1667 .
+```
+
 # Contribution
 
 Install package in editable mode
